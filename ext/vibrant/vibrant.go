@@ -4,6 +4,7 @@ package main
 #include <ruby/ruby.h>
 
 VALUE vibrant_from_url(VALUE,VALUE);
+VALUE vibrant_from_file(VALUE,VALUE);
 */
 import "C"
 
@@ -13,6 +14,7 @@ import (
 	_ "image/jpeg"
 	"io"
 	"net/http"
+	"os"
 	"unsafe"
 )
 
@@ -29,6 +31,15 @@ func goobj_retain(obj unsafe.Pointer) {
 //export goobj_free
 func goobj_free(obj unsafe.Pointer) {
 	delete(objects, obj)
+}
+
+//export vibrant_from_file
+func vibrant_from_file(dummy C.VALUE, path C.VALUE) C.VALUE {
+	file, err := os.Open(RbGoString(path))
+	if err != nil {
+		rb_raise(C.rb_eArgError, "'%s'", err)
+	}
+	return extract(file)
 }
 
 //export vibrant_from_url
@@ -64,4 +75,5 @@ func to_hash(a map[string]*vibrant.Swatch) C.VALUE {
 func Init_vibrant() {
 	rb_cVibrant = rb_define_class("Vibrant", C.rb_cObject)
 	rb_define_singleton_method(rb_cVibrant, "from_url", C.vibrant_from_url, 1)
+	rb_define_singleton_method(rb_cVibrant, "from_file", C.vibrant_from_file, 1)
 }
