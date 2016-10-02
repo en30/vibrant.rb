@@ -1,15 +1,13 @@
 # Vibrant
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/vibrant`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This is a ruby binding of [https://github.com/generaltso/vibrant](https://github.com/generaltso/vibrant), which is a go port of the Android Palette class.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'vibrant'
+gem 'vibrant', github: 'en30/vibrant.rb'
 ```
 
 And then execute:
@@ -22,7 +20,14 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+Vibrant.from_file(PATH_TO_IMAGE_FILE)
+#=> {"LightMuted"=> "#ffffff", "DarkMuted"=>"#ffffff", "Vibrant"=>"#ffffff", "LightVibrant"=>"#ffffff", "DarkVibrant"=>"#ffffff", "Muted"=>"#ffffff"}
+
+Vibrant.from_url(URL)
+#=> {"LightMuted"=> "#ffffff", "DarkMuted"=>"#ffffff", "Vibrant"=>"#ffffff", "LightVibrant"=>"#ffffff", "DarkVibrant"=>"#ffffff", "Muted"=>"#ffffff"}
+```
+
 
 ## Development
 
@@ -32,10 +37,9 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/vibrant. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/en30/vibrant.rb
 
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
