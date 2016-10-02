@@ -8,12 +8,10 @@ VALUE vibrant_from_url(VALUE,VALUE);
 import "C"
 
 import (
-	"fmt"
 	"github.com/generaltso/vibrant"
 	"image"
 	_ "image/jpeg"
 	"io"
-	"log"
 	"net/http"
 	"unsafe"
 )
@@ -35,10 +33,9 @@ func goobj_free(obj unsafe.Pointer) {
 
 //export vibrant_from_url
 func vibrant_from_url(dummy C.VALUE, url C.VALUE) C.VALUE {
-	fmt.Println(RbGoString(url))
 	resp, err := http.Get(RbGoString(url))
 	if err != nil {
-		log.Fatalln(err)
+		rb_raise(C.rb_eArgError, "'%s'", err)
 	}
 	return extract(resp.Body)
 }
@@ -46,11 +43,11 @@ func vibrant_from_url(dummy C.VALUE, url C.VALUE) C.VALUE {
 func extract(reader io.Reader) C.VALUE {
 	img, _, err := image.Decode(reader)
 	if err != nil {
-		log.Fatalln(err)
+		rb_raise(C.rb_eArgError, "'%s'", err)
 	}
 	palette, err := vibrant.NewPaletteFromImage(img)
 	if err != nil {
-		log.Fatalln(err)
+		rb_raise(C.rb_eArgError, "'%s'", err)
 	}
 	return to_hash(palette.ExtractAwesome())
 }
@@ -65,7 +62,6 @@ func to_hash(a map[string]*vibrant.Swatch) C.VALUE {
 
 //export Init_vibrant
 func Init_vibrant() {
-	fmt.Println("Init")
 	rb_cVibrant = rb_define_class("Vibrant", C.rb_cObject)
 	rb_define_singleton_method(rb_cVibrant, "from_url", C.vibrant_from_url, 1)
 }
