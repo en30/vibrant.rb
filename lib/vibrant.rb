@@ -4,6 +4,7 @@ begin
 rescue LoadError
   require "vibrant/vibrant"
 end
+require "vibrant/swatch"
 
-class Vibrant
+module Vibrant
 end

@@ -22,10 +22,15 @@ Or install it yourself as:
 
 ```ruby
 Vibrant.from_file(PATH_TO_IMAGE_FILE)
-#=> {"LightMuted"=> "#ffffff", "DarkMuted"=>"#ffffff", "Vibrant"=>"#ffffff", "LightVibrant"=>"#ffffff", "DarkVibrant"=>"#ffffff", "Muted"=>"#ffffff"}
+#=> {"DarkVibrant"=>#<Vibrant::Swatch:id>, "Muted"=>#<Vibrant::Swatch:id>, "DarkMuted"=>#<Vibrant::Swatch:id>, "Vibrant"=>#<Vibrant::Swatch:id>}
 
-Vibrant.from_url(URL)
-#=> {"LightMuted"=> "#ffffff", "DarkMuted"=>"#ffffff", "Vibrant"=>"#ffffff", "LightVibrant"=>"#ffffff", "DarkVibrant"=>"#ffffff", "Muted"=>"#ffffff"}
+res = Vibrant.from_url(URL)
+#=> {"DarkVibrant"=>#<Vibrant::Swatch:id>, "Muted"=>#<Vibrant::Swatch:id>, "DarkMuted"=>#<Vibrant::Swatch:id>, "Vibrant"=>#<Vibrant::Swatch:id>}
+
+swatch = res['Vibrant']
+swatch.color #=> 12032073
+swatch.rgb   #=> [183, 152, 73]
+swatch.hex   #=> "#b79849"
 ```
 
 

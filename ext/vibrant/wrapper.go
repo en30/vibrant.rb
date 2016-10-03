@@ -76,9 +76,27 @@ func RbString(str string) C.VALUE {
 	return C.rb_utf8_str_new(cstr, C.long(len(str)))
 }
 
+func rb_define_module(name string) C.VALUE {
+	mname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	v := C.rb_define_module(mname)
+	return v
+}
+
+func rb_define_module_under(ns C.VALUE, name string) C.VALUE {
+	mname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	v := C.rb_define_module_under(ns, mname)
+	return v
+}
+
 func rb_define_class(name string, parent C.VALUE) C.VALUE {
 	cname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
 	v := C.rb_define_class(cname, parent)
+	return v
+}
+
+func rb_define_class_under(ns C.VALUE, name string, parent C.VALUE) C.VALUE {
+	cname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	v := C.rb_define_class_under(ns, cname, parent)
 	return v
 }
 

@@ -3,8 +3,14 @@ package main
 /*
 #include <ruby/ruby.h>
 
+VALUE NewGoStruct(VALUE klass, void *p);
+void *GetGoStruct(VALUE obj);
+
 VALUE vibrant_from_url(VALUE,VALUE);
 VALUE vibrant_from_file(VALUE,VALUE);
+VALUE swatchColor(VALUE);
+VALUE swatchPopulation(VALUE);
+VALUE swatchName(VALUE);
 */
 import "C"
 
@@ -22,6 +28,7 @@ func main() {
 }
 
 var rb_cVibrant C.VALUE
+var rb_cSwatch C.VALUE
 
 //export goobj_retain
 func goobj_retain(obj unsafe.Pointer) {
@@ -66,14 +73,46 @@ func extract(reader io.Reader) C.VALUE {
 func to_hash(a map[string]*vibrant.Swatch) C.VALUE {
 	hash := C.rb_hash_new()
 	for name, swatch := range a {
-		C.rb_hash_aset(hash, RbString(name), RbString(swatch.RGBHex()))
+		C.rb_hash_aset(hash, RbString(name), swatchNew(rb_cSwatch, swatch))
 	}
 	return hash
 }
 
+func swatchNew(klass C.VALUE, s *vibrant.Swatch) C.VALUE {
+	return C.NewGoStruct(klass, unsafe.Pointer(s))
+}
+
+//export swatchColor
+func swatchColor(self C.VALUE) C.VALUE {
+	swatch := (*vibrant.Swatch)(C.GetGoStruct(self))
+	return INT2NUM(swatch.Color)
+}
+
+//export swatchPopulation
+func swatchPopulation(self C.VALUE) C.VALUE {
+	swatch := (*vibrant.Swatch)(C.GetGoStruct(self))
+	return INT2NUM(swatch.Population)
+}
+
+//export swatchName
+func swatchName(self C.VALUE) C.VALUE {
+	swatch := (*vibrant.Swatch)(C.GetGoStruct(self))
+	return RbString(swatch.Name)
+}
+
 //export Init_vibrant
 func Init_vibrant() {
-	rb_cVibrant = rb_define_class("Vibrant", C.rb_cObject)
+	sNew := "new"
+	str_new := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&sNew)))[0]))
+
+	rb_cVibrant = rb_define_module("Vibrant")
 	rb_define_singleton_method(rb_cVibrant, "from_url", C.vibrant_from_url, 1)
 	rb_define_singleton_method(rb_cVibrant, "from_file", C.vibrant_from_file, 1)
+
+	rb_cSwatch = rb_define_class_under(rb_cVibrant, "Swatch", C.rb_cObject)
+	C.rb_undef_alloc_func(rb_cSwatch)
+	C.rb_undef_method(C.rb_class_of(rb_cSwatch), str_new)
+	rb_define_method(rb_cSwatch, "color", C.swatchColor, 0)
+	rb_define_method(rb_cSwatch, "population", C.swatchPopulation, 0)
+	rb_define_method(rb_cSwatch, "name", C.swatchName, 0)
 }
