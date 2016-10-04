@@ -46,12 +46,14 @@ import "fmt"
 var objects = make(map[interface{}]bool)
 
 func rb_define_method(klass C.VALUE, name string, fun unsafe.Pointer, args int) {
-	cname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
 	C.rb_define_method(klass, cname, (*[0]byte)(fun), C.int(args))
 }
 
 func rb_define_singleton_method(klass C.VALUE, name string, fun unsafe.Pointer, args int) {
-	cname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
 	C.rb_define_singleton_method(klass, cname, (*[0]byte)(fun), C.int(args))
 }
 
@@ -77,37 +79,43 @@ func RbString(str string) C.VALUE {
 }
 
 func rb_define_module(name string) C.VALUE {
-	mname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
-	v := C.rb_define_module(mname)
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
+	v := C.rb_define_module(cname)
 	return v
 }
 
 func rb_define_module_under(ns C.VALUE, name string) C.VALUE {
-	mname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
-	v := C.rb_define_module_under(ns, mname)
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
+	v := C.rb_define_module_under(ns, cname)
 	return v
 }
 
 func rb_define_class(name string, parent C.VALUE) C.VALUE {
-	cname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
 	v := C.rb_define_class(cname, parent)
 	return v
 }
 
 func rb_define_class_under(ns C.VALUE, name string, parent C.VALUE) C.VALUE {
-	cname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
 	v := C.rb_define_class_under(ns, cname, parent)
 	return v
 }
 
 func rb_iv_set(obj C.VALUE, name string, v C.VALUE) C.VALUE {
-	cname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
 	return C.rb_iv_set(obj, cname, v)
 }
 
 func rb_raise(exc C.VALUE, format string, a ...interface{}) {
 	str := fmt.Sprintf(format, a...)
-	cstr := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&str)))[0]))
+	cstr := C.CString(str)
+	defer C.free(unsafe.Pointer(cstr))
 	C.rb_raise2(exc, cstr)
 }
 

@@ -122,8 +122,8 @@ func swatchName(self C.VALUE) C.VALUE {
 
 //export Init_vibrant
 func Init_vibrant() {
-	sNew := "new"
-	str_new := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&sNew)))[0]))
+	str_new := C.CString("new")
+	defer C.free(unsafe.Pointer(str_new))
 
 	rb_cVibrant = rb_define_module("Vibrant")
 
