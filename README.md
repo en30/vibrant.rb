@@ -21,13 +21,23 @@ Or install it yourself as:
 ## Usage
 
 ```ruby
-Vibrant.from_file(PATH_TO_IMAGE_FILE)
-#=> {"DarkVibrant"=>#<Vibrant::Swatch:id>, "Muted"=>#<Vibrant::Swatch:id>, "DarkMuted"=>#<Vibrant::Swatch:id>, "Vibrant"=>#<Vibrant::Swatch:id>}
+palette = Vibrant::Palette.from_file(PATH_TO_IMAGE_FILE) # or from_url(URL)
+=> #<Vibrant::Palette:0x007f7f741884b8 @swatches=[#<Vibrant::Swatch:0x007f7f74188468>, #<Vibrant::Swatch:0x007f7f74188440>, #<Vibrant::Swatch:0x007f7f741883c8>, #<Vibrant::Swatch:0x007f7f741883a0>]>
 
-res = Vibrant.from_url(URL)
-#=> {"DarkVibrant"=>#<Vibrant::Swatch:id>, "Muted"=>#<Vibrant::Swatch:id>, "DarkMuted"=>#<Vibrant::Swatch:id>, "Vibrant"=>#<Vibrant::Swatch:id>}
+palette.swatches #=> [#<Vibrant::Swatch:id>, #<Vibrant::Swatch:id>, #<Vibrant::Swatch:id>, #<Vibrant::Swatch:id>]
 
-swatch = res['Vibrant']
+palette.vibrant       #=> #<Vibrant::Swatch:id>
+palette.light_vibrant #=> #<Vibrant::Swatch:id>
+palette.dark_vibrant  #=> #<Vibrant::Swatch:id>
+palette.muted         #=> #<Vibrant::Swatch:id>
+palette.light_muted   #=> #<Vibrant::Swatch:id>
+palette.dark_muted    #=> #<Vibrant::Swatch:id>
+
+highest_contrast_swathes, c = palette.pairs_with_contrast.sort_by {|((s1, s2), c)| c }.last
+
+swatch = pallete.swatches[0]
+swatch.population #=> 100
+swatch.name  #=> "LightVibrant"
 swatch.color #=> 12032073
 swatch.rgb   #=> [183, 152, 73]
 swatch.hex   #=> "#b79849"

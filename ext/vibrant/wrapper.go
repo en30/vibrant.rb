@@ -100,6 +100,11 @@ func rb_define_class_under(ns C.VALUE, name string, parent C.VALUE) C.VALUE {
 	return v
 }
 
+func rb_iv_set(obj C.VALUE, name string, v C.VALUE) C.VALUE {
+	cname := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&name)))[0]))
+	return C.rb_iv_set(obj, cname, v)
+}
+
 func rb_raise(exc C.VALUE, format string, a ...interface{}) {
 	str := fmt.Sprintf(format, a...)
 	cstr := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&str)))[0]))

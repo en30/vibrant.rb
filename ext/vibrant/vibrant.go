@@ -6,8 +6,9 @@ package main
 VALUE NewGoStruct(VALUE klass, void *p);
 void *GetGoStruct(VALUE obj);
 
-VALUE vibrant_from_url(VALUE,VALUE);
-VALUE vibrant_from_file(VALUE,VALUE);
+VALUE paletteFromUrl(VALUE,VALUE);
+VALUE paletteFromFile(VALUE,VALUE);
+VALUE paletteSwatches(VALUE);
 VALUE swatchColor(VALUE);
 VALUE swatchPopulation(VALUE);
 VALUE swatchName(VALUE);
@@ -28,6 +29,7 @@ func main() {
 }
 
 var rb_cVibrant C.VALUE
+var rb_cPalette C.VALUE
 var rb_cSwatch C.VALUE
 
 //export goobj_retain
@@ -40,21 +42,23 @@ func goobj_free(obj unsafe.Pointer) {
 	delete(objects, obj)
 }
 
-//export vibrant_from_file
-func vibrant_from_file(dummy C.VALUE, path C.VALUE) C.VALUE {
+//export paletteFromFile
+func paletteFromFile(dummy C.VALUE, path C.VALUE) C.VALUE {
 	file, err := os.Open(RbGoString(path))
 	if err != nil {
 		rb_raise(C.rb_eArgError, "'%s'", err)
 	}
+	defer file.Close()
 	return extract(file)
 }
 
-//export vibrant_from_url
-func vibrant_from_url(dummy C.VALUE, url C.VALUE) C.VALUE {
+//export paletteFromUrl
+func paletteFromUrl(dummy C.VALUE, url C.VALUE) C.VALUE {
 	resp, err := http.Get(RbGoString(url))
 	if err != nil {
 		rb_raise(C.rb_eArgError, "'%s'", err)
 	}
+	defer resp.Body.Close()
 	return extract(resp.Body)
 }
 
@@ -67,7 +71,21 @@ func extract(reader io.Reader) C.VALUE {
 	if err != nil {
 		rb_raise(C.rb_eArgError, "'%s'", err)
 	}
-	return to_hash(palette.ExtractAwesome())
+	return paletteNew(palette.ExtractAwesome())
+}
+
+func paletteNew(m map[string]*vibrant.Swatch) C.VALUE {
+	p := C.rb_class_new_instance(0, nil, rb_cPalette)
+	rb_iv_set(p, "@swatches", paletteSwatches(m))
+	return p
+}
+
+func paletteSwatches(m map[string]*vibrant.Swatch) C.VALUE {
+	ary := C.rb_ary_new()
+	for _, s := range m {
+		C.rb_ary_push(ary, swatchNew(rb_cSwatch, s))
+	}
+	return ary
 }
 
 func to_hash(a map[string]*vibrant.Swatch) C.VALUE {
@@ -106,8 +124,11 @@ func Init_vibrant() {
 	str_new := (*C.char)(unsafe.Pointer(&(*(*[]byte)(unsafe.Pointer(&sNew)))[0]))
 
 	rb_cVibrant = rb_define_module("Vibrant")
-	rb_define_singleton_method(rb_cVibrant, "from_url", C.vibrant_from_url, 1)
-	rb_define_singleton_method(rb_cVibrant, "from_file", C.vibrant_from_file, 1)
+
+	rb_cPalette = rb_define_class_under(rb_cVibrant, "Palette", C.rb_cObject)
+	C.rb_undef_method(C.rb_class_of(rb_cPalette), str_new)
+	rb_define_singleton_method(rb_cPalette, "from_url", C.paletteFromUrl, 1)
+	rb_define_singleton_method(rb_cPalette, "from_file", C.paletteFromFile, 1)
 
 	rb_cSwatch = rb_define_class_under(rb_cVibrant, "Swatch", C.rb_cObject)
 	C.rb_undef_alloc_func(rb_cSwatch)
